@@ -1,23 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import { Route, Switch, Redirect } from "react-router-dom";
+import "./App.css";
+
+//Route Imports
+import Home from "./pages/Home";
+import Login from "./Auth/Login";
+import Signup from "./Auth/Signup";
+import Forgot from "./Auth/Forgot";
+
+import useAuth from "./hooks/useAuth";
+import UserContext from "./contexts/UserContext";
+import Header from "./components/Header";
+import SingleQR from "./components/SingleQr";
+import QrCode from "./components/qrCode";
 
 function App() {
+  const [user, setUser] = useAuth();
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <UserContext.Provider value={{ user, setUser }}>
+        <Header />
+
+        <Switch>
+          <Route path="/" render={() => <Redirect to="/home" />} exact={true} />
+          <Route path="/home" component={Home} />
+          <Route path="/login" component={Login} />
+          <Route path="/signup" component={Signup} />
+          <Route path="/forgot" component={Forgot} />
+          <Route path="/user/:userId/code/:codeId" component={SingleQR} />
+        </Switch>
+      </UserContext.Provider>
     </div>
   );
 }
