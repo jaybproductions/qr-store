@@ -5,15 +5,25 @@ import firebase from "../firebase";
 import UserContext from "../contexts/UserContext";
 import NewQrModal from "../components/NewQrModal";
 import QrCodeList from "../components/QrCodeList";
+import TextField from "@material-ui/core/TextField";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import SearchBar from "../components/SearchBar";
 
 const Home = () => {
   const [data, setData] = useState([]);
   const { user } = useContext(UserContext);
   const [open, setOpen] = useState(false);
+  const [filteredData, setFilteredData] = useState([]);
+  const [filtData, setFiltData] = useState([]);
+  let filtArr = [];
 
   useEffect(() => {
     getData();
   }, [user]);
+
+  useEffect(() => {
+    getFilteredData();
+  }, [user, filteredData]);
 
   const handleOpen = () => {
     setOpen(true);
@@ -25,8 +35,27 @@ const Home = () => {
     } else {
       const docRef = firebase.db.collection("users").doc(user.uid);
       const snapshot = await docRef.get();
-      console.log(snapshot);
       const qrCodeData = snapshot.data().qrCodes;
+      setData(qrCodeData);
+    }
+  };
+
+  const getFilteredData = async () => {
+    if (!user) {
+      console.log("waiting to connect");
+    } else {
+      const docRef = firebase.db.collection("users").doc(user.uid);
+      const snapshot = await docRef.get();
+      const qrCodeData = snapshot.data().qrCodes;
+      qrCodeData.forEach((code, index) => {
+        filteredData.map((tag, index) => {
+          if (code.tags.includes(tag)) {
+            filtArr.push(code);
+          }
+        });
+      });
+
+      setFiltData(filtArr);
       setData(qrCodeData);
     }
   };
@@ -39,8 +68,22 @@ const Home = () => {
             New QR Code
           </button>
           <h3>Your QR Code Bank</h3>
+          <SearchBar
+            filteredData={filteredData}
+            setFilteredData={setFilteredData}
+          />
           <NewQrModal open={open} setOpen={setOpen} user={user} />
-          <QrCodeList qrcodes={data} user={user} />
+          {filteredData.length > 0 ? (
+            <>
+              {" "}
+              <QrCodeList qrcodes={filtData} user={user} />
+            </>
+          ) : (
+            <>
+              <QrCodeList qrcodes={data} user={user} />
+            </>
+          )}
+          <br />
         </>
       ) : (
         <>

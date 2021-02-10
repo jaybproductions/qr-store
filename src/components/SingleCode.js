@@ -37,7 +37,7 @@ const SingleCode = ({
             setBool={setBool}
           />
           <Link onClick={(e) => setOpen(true)}>
-            <LockIcon />
+            <LockIcon fontSize="large" />
           </Link>
         </>
       ) : (
