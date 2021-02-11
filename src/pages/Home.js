@@ -8,17 +8,33 @@ import QrCodeList from "../components/QrCodeList";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import SearchBar from "../components/SearchBar";
+import { CircularProgress } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: "inline-block",
+    "& > * + *": {
+      marginLeft: theme.spacing(2),
+    },
+  },
+}));
 
 const Home = () => {
+  const classes = useStyles();
   const [data, setData] = useState([]);
   const { user } = useContext(UserContext);
   const [open, setOpen] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [filtData, setFiltData] = useState([]);
+  const [loading, setLoading] = useState(true);
   let filtArr = [];
 
   useEffect(() => {
     getData();
+    setTimeout(() => {
+      setLoading(false);
+    }, 1500);
   }, [user]);
 
   useEffect(() => {
@@ -61,34 +77,42 @@ const Home = () => {
   };
   return (
     <div className="home">
-      {user ? (
+      {loading ? (
+        <div className={classes.root}>
+          <CircularProgress size={60} />{" "}
+        </div>
+      ) : (
         <>
-          {" "}
-          <button className="btn btn-success" onClick={() => setOpen(true)}>
-            New QR Code
-          </button>
-          <h3>Your QR Code Bank</h3>
-          <SearchBar
-            filteredData={filteredData}
-            setFilteredData={setFilteredData}
-          />
-          <NewQrModal open={open} setOpen={setOpen} user={user} />
-          {filteredData.length > 0 ? (
+          {user ? (
             <>
               {" "}
-              <QrCodeList qrcodes={filtData} user={user} />
+              <button className="btn btn-success" onClick={() => setOpen(true)}>
+                New QR Code
+              </button>
+              <h3>Your QR Code Bank</h3>
+              <SearchBar
+                filteredData={filteredData}
+                setFilteredData={setFilteredData}
+              />
+              <NewQrModal open={open} setOpen={setOpen} user={user} />
+              {filteredData.length > 0 ? (
+                <>
+                  {" "}
+                  <QrCodeList qrcodes={filtData} user={user} />
+                </>
+              ) : (
+                <>
+                  <QrCodeList qrcodes={data} user={user} />
+                </>
+              )}
+              <br />
             </>
           ) : (
             <>
-              <QrCodeList qrcodes={data} user={user} />
+              <h1>Welcome to QR Store</h1>
+              <p>Please login to access your QR Codes</p>
             </>
-          )}
-          <br />
-        </>
-      ) : (
-        <>
-          <h1>Welcome to QR Store</h1>
-          <p>Please login to access your QR Codes</p>
+          )}{" "}
         </>
       )}
     </div>

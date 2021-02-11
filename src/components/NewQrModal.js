@@ -10,8 +10,25 @@ import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import { v4 as uuidv4 } from "uuid";
 import firebase from "../firebase";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormHelperText from "@material-ui/core/FormHelperText";
+import FormControl from "@material-ui/core/FormControl";
+import Select from "@material-ui/core/Select";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+  formControl: {
+    margin: theme.spacing(1),
+    minWidth: 120,
+  },
+  selectEmpty: {
+    marginTop: theme.spacing(2),
+  },
+}));
 
 const NewQrModal = ({ open, setOpen, user }) => {
+  const classes = useStyles();
   const [name, setName] = useState("");
   const [data, setData] = useState("");
   const [codes, setCodes] = useState([]);
@@ -20,9 +37,15 @@ const NewQrModal = ({ open, setOpen, user }) => {
   const [passBool, setPassBool] = useState(false);
   const [password, setPassword] = useState("");
   const rootURL = "https://chart.googleapis.com/chart?";
+  const [timer, setTimer] = React.useState("");
+  const [timerBool, setTimerBool] = useState(0);
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleChangeTimer = (event) => {
+    setTimer(event.target.value);
   };
 
   const handleSubmit = async () => {
@@ -44,6 +67,8 @@ const NewQrModal = ({ open, setOpen, user }) => {
         tags: newTags,
         passwordProtect: passBool,
         password: password,
+        created: Date.now(),
+        timer: timer,
       };
       console.log(snapshot.data());
       setCodes(snapshot.data().qrCodes);
@@ -56,6 +81,11 @@ const NewQrModal = ({ open, setOpen, user }) => {
 
   const handleChange = (e) => {
     setPassBool(e.target.checked);
+    console.log(e.target.checked);
+  };
+
+  const handleChangeTimerBool = (e) => {
+    setTimerBool(e.target.checked);
     console.log(e.target.checked);
   };
 
@@ -123,6 +153,31 @@ const NewQrModal = ({ open, setOpen, user }) => {
               onChange={(e) => setPassword(e.target.value)}
               fullWidth
             />
+          )}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={timerBool}
+                onChange={handleChangeTimerBool}
+                inputProps={{ "aria-label": "primary checkbox" }}
+              />
+            }
+            label="Timer?"
+          ></FormControlLabel>
+          {timerBool && (
+            <FormControl className={classes.formControl}>
+              <InputLabel id="demo-simple-select-label">Timer</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={timer}
+                onChange={handleChangeTimer}
+              >
+                <MenuItem value={600}>10 Min</MenuItem>
+                <MenuItem value={1200}>20 Min</MenuItem>
+                <MenuItem value={1800}>30 Min</MenuItem>
+              </Select>
+            </FormControl>
           )}
           <TextField
             autoFocus

@@ -7,13 +7,27 @@ import LockIcon from "@material-ui/icons/Lock";
 import PasswordModal from "./PasswordModal";
 import SingleCode from "./SingleCode";
 import SingleContainer from "./SingleContainer";
+import { CircularProgress } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: "inline-block",
+    "& > * + *": {
+      marginLeft: theme.spacing(2),
+    },
+  },
+}));
 
 const SingleQR = () => {
+  const classes = useStyles();
   let { codeId } = useParams();
   let { userId } = useParams();
   const [data, setData] = useState([]);
   const [filter, setFilter] = useState({});
   const { user } = useContext(UserContext);
+  const [available, setAvailable] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getData();
@@ -27,7 +41,6 @@ const SingleQR = () => {
       const qrCodeData = snapshot.data().qrCodes;
       setData(qrCodeData);
       let filtered = snapshot.data().qrCodes.filter((code, index) => {
-        console.log(code.id, codeId);
         return code.id === codeId;
       });
 
@@ -43,8 +56,35 @@ const SingleQR = () => {
       });
 
       const filtData = filtered[0];
-      console.log(filtered[0]);
       setFilter(filtData);
+    }
+  };
+
+  useEffect(() => {
+    if (Object.keys(filter).length === 0) return;
+    CheckTime();
+    setLoading(false);
+  }, [filter]);
+
+  const CheckTime = () => {
+    const timer = filter.timer;
+    const currTempTime = Date.now();
+    const dateInSecs = Math.round(currTempTime / 1000);
+    const createdToSecs = Math.round(filter.created / 1000);
+    const expirationTime = createdToSecs + timer;
+    console.log(
+      "created: ",
+      createdToSecs,
+      "expires: ",
+      expirationTime,
+      "current: ",
+      dateInSecs
+    );
+
+    if (expirationTime > dateInSecs) {
+      setAvailable(true);
+    } else {
+      return;
     }
   };
 
@@ -56,7 +96,25 @@ const SingleQR = () => {
           you would like to share this code with.
         </h4>
       </div>
-      <SingleContainer single={filter} />
+      {loading ? (
+        <div className={classes.root}>
+          <CircularProgress size={60} />{" "}
+        </div>
+      ) : (
+        <>
+          {" "}
+          {available && (
+            <>
+              <SingleContainer single={filter} />{" "}
+            </>
+          )}
+          {!available && (
+            <>
+              <div>This code has expired...</div>
+            </>
+          )}{" "}
+        </>
+      )}
     </div>
   );
 };
