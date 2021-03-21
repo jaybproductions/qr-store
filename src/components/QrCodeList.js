@@ -1,5 +1,5 @@
 import React from "react";
-import QrCode from "../components/qrCode";
+import QrCode from "./qrCode";
 import { Link } from "react-router-dom";
 import Grid from "@material-ui/core/Grid";
 import { makeStyles } from "@material-ui/core/styles";
@@ -28,7 +28,7 @@ const QrCodeList = ({ qrcodes, user }) => {
       <Grid container spacing={3}>
         {qrcodes.map((code, index) => (
           <>
-            <Grid item xs={3} alignItems="stretch">
+            <Grid item xs={3} md={6} alignItems="stretch">
               <Paper className={classes.paper}>
                 <QrCode
                   user={user}
